@@ -68,6 +68,7 @@ JobTrackerAPI/
 1. Initialize ASP.NET Core Web API  
 2. Connect to MongoDB Atlas; use environment variables  
 3. AuthController (JWT, BCrypt)  
+3_5. Login Controller
 4. JobsController CRUD endpoints  
 5. Enable CORS for React frontend  
 6. Test endpoints with Postman  
@@ -95,6 +96,234 @@ JobTrackerAPI/
 - Deploy backend: Azure App Service  
 - Deploy frontend: Azure Static Web App  
 - Configure environment variables (MongoDB URI, JWT secret)  
+
+---
+
+# Job Tracker Database Schema
+
+## Collections / Tables
+
+### 1. Users
+Stores login and personal info.
+
+- **_id** (ObjectId / INT PK)
+- **username** (string, unique)
+- **passwordHash** (string, hashed with BCrypt)
+- **name** (string)
+- **userDataId** (ObjectId / FK → UserData)
+
+---
+
+### 2. JobApplications
+Stores jobs the user applied for.
+
+- **_id** (ObjectId / INT PK)
+- **userId** (ObjectId / FK → Users)
+- **jobTitle** (string)
+- **company** (string)
+- **status** (string, e.g., "Applied", "Interview", "Rejected", "Offer")
+- **dateApplied** (date)
+- **accountNeeded** (boolean)
+- **jobUrl** (string, job posting link)
+
+---
+
+### 3. CompanyAccounts
+Stores credentials for company-specific job portals.
+
+- **_id** (ObjectId / INT PK)
+- **userId** (ObjectId / FK → Users)
+- **companyName** (string, e.g., "CIBC")
+- **email** (string)
+- **password** (string, AES encrypted)
+- **portalUrl** (string)
+
+---
+
+### 4. UserData
+Stores general profile info and user documents.
+
+- **_id** (ObjectId / INT PK)
+- **userId** (ObjectId / FK → Users)
+- **linkedinUrl** (string)
+- **githubUrl** (string)
+- **personalWebsiteUrl** (string)
+
+#### Embedded / Related Collections
+
+**Resumes**
+- **_id** (ObjectId / INT PK)
+- **userDataId** (ObjectId / FK → UserData)
+- **title** (string, e.g., "Software Engineer Resume")
+- **filePath** or **fileUrl** (string → local or Azure Blob Storage)
+- **createdAt** (date)
+
+**CoverLetters**
+- **_id** (ObjectId / INT PK)
+- **userDataId** (ObjectId / FK → UserData)
+- **title** (string, e.g., "Cover Letter for Backend Role")
+- **filePath** or **fileUrl** (string → local or Azure Blob Storage)
+- **resumeId** (ObjectId / FK → Resumes, for 1-to-1 mapping)
+- **createdAt** (date)
+
+---
+
+# 🌐 Page Routing Overview  
+
+- **`/login` → Dashboard**  
+  - After successful login, the user is redirected to `/dashboard`.  
+
+- **`/dashboard`** → Central hub  
+  - From here, users can navigate to all other sections.  
+
+---
+
+# 🛠 Pages and Components  
+
+## 1. Login Page (`/login`)
+- **Components**:  
+  - `LoginForm` (username + password)  
+  - `AuthProvider` (handles session/token)  
+- **Routes to**:  
+  - `/dashboard` on success  
+
+---
+
+## 2. Dashboard Page (`/dashboard`)
+- **Components**:  
+  - `Navbar` (links to all sections)  
+  - `Sidebar` (optional quick navigation)  
+  - `DashboardOverview` (summary: applications count, saved companies, etc.)  
+- **Routes to**:  
+  - `/applications`  
+  - `/companies`  
+  - `/userdata`  
+
+---
+
+## 3. Job Applications Page (`/applications`)
+- **Components**:  
+  - `ApplicationsList` (table of job postings with status, company, date applied, etc.)  
+  - `ApplicationForm` (add/update job application)  
+  - `FilterSortBar` (search/filter by status, company, date applied)  
+- **Routes from Dashboard**:  
+  - `/applications/:id` (view/edit specific application)  
+
+---
+
+## 4. Company Accounts Page (`/companies`)
+- **Components**:  
+  - `CompanyList` (saved company accounts with name, email, portal URL)  
+  - `CompanyForm` (add/edit company account)  
+- **Routes from Dashboard**:  
+  - `/companies/:id` (edit a specific company account)  
+
+---
+
+## 5. User Data Page (`/userdata`)
+- **Components**:  
+  - `UserDataForm` (LinkedIn, GitHub, website, email, password)  
+  - `UserDataView` (preview stored personal data)  
+- **Routes from Dashboard**:  
+  - `/userdata/edit`  
+
+---
+
+# 🔄 Routing Flow Summary  
+
+- **Login → Dashboard**  
+- **Dashboard → Applications | Companies | UserData**  
+- **Applications → Specific Application**  
+- **Companies → Specific Company**  
+- **UserData → Edit User Data**  
+
+---
+
+# 🎨 Job Tracker – Frontend Style Guide  
+
+## 🌐 Framework  
+- **React (Vite)** for frontend  
+- **Material UI (MUI v5)** for components & styling  
+- **Custom overrides** only when necessary  
+
+---
+
+## 🖋 Typography  
+- **Font Family**: Roboto (default with MUI)  
+- **Font Sizes**:  
+  - Headings: `h1, h2, h3` → MUI defaults (responsive)  
+  - Body: `body1` (primary text), `body2` (secondary text/hints)  
+  - Buttons: `button` variant  
+
+- **Colors**:  
+  - Primary Text: `#212121` (dark grey)  
+  - Secondary Text: `#616161` (medium grey)  
+  - Links: `#0288d1` (soft blue)  
+
+---
+
+## 🎨 Color Palette (Light Orange + Light Blue Theme)  
+- **Primary (Light Blue)**: `#4FC3F7`  
+- **Secondary (Light Orange)**: `#FFB74D`  
+- **Accent (Deeper Orange for buttons/highlights)**: `#FF9800`  
+- **Error**: `#E57373` (soft red)  
+- **Success**: `#81C784` (soft green)  
+- **Background**: `#FAFAFA` (light grey/white)  
+- **Surface / Cards**: White `#FFFFFF`  
+
+---
+
+## 📦 Layout & Components  
+
+### App Layout  
+- Use `AppBar` with **primary (light blue)** background  
+- Use `Drawer` with **secondary (light orange)** highlights for active menu items  
+- Wrap page content inside `Container` for consistent spacing  
+- Use `Box` + `Grid` for responsive layout  
+
+### Buttons  
+- Primary actions → `contained` with **light blue**  
+- Secondary actions → `outlined` with **light orange**  
+- Hover states → slightly darker shade of each color  
+
+### Forms  
+- `TextField` fullWidth with subtle **blue underline** focus state  
+- Validation:  
+  - Error → `#E57373` border + helper text  
+  - Success → normal grey, no need for explicit green unless critical  
+- Submit buttons → light orange (`contained`)  
+
+### Tables / Lists  
+- Job applications → `DataGrid` with alternating row background (`#F5F5F5`)  
+- Company accounts → `List` with icons in **orange**  
+
+### Cards  
+- Use `Card` with subtle shadow  
+- Header background can use **light blue** for consistency  
+- Content → white with orange accents  
+
+---
+
+## 🔄 Theming  
+```js
+import { createTheme } from "@mui/material/styles";
+
+const theme = createTheme({
+  palette: {
+    primary: { main: "#4FC3F7" }, // light blue
+    secondary: { main: "#FFB74D" }, // light orange
+    background: { default: "#FAFAFA" },
+    error: { main: "#E57373" },
+    success: { main: "#81C784" },
+  },
+  typography: {
+    fontFamily: "Roboto, Arial, sans-serif",
+  },
+  shape: {
+    borderRadius: 8,
+  },
+});
+export default theme;
 
 ---
 
