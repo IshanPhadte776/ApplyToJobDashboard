@@ -56,7 +56,7 @@ public class AuthControllerTest {
 
         User user = userRepository.findByEmail("test@example.com").orElse(null);
         assertThat(user).isNotNull();
-        assertThat(user.getUserDataID()).isEqualTo("IP083");
+        assertThat(user.getUserID()).isEqualTo("IP083");
 
         // --- Login ---
         Map<String, String> loginBody = Map.of(

@@ -9,22 +9,31 @@ public class User {
     private String id;
     private String email;
     private String password;
-    private String userDataID;
+    private String userID; // renamed from userDataID
+    private String name;   // added name field
 
     // Constructors
     public User() {}
-    public User(String email, String password, String userDataID) {
+
+    public User(String email, String password, String userID, String name) {
         this.email = email;
         this.password = password;
-        this.userDataID = userDataID;
+        this.userID = userID;
+        this.name = name;
     }
 
     // Getters & Setters
     public String getId() { return id; }
+
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
-    public String getUserDataID() { return userDataID; }
-    public void setUserDataID(String userDataID) { this.userDataID = userDataID; }
+
+    public String getUserID() { return userID; }  // renamed getter
+    public void setUserID(String userID) { this.userID = userID; } // renamed setter
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 }

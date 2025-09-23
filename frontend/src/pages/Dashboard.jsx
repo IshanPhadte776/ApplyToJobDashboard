@@ -1,19 +1,27 @@
 import { Container, Typography, Button, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { UserContext } from '../context/UserContext';
 
 function Dashboard() {
   const navigate = useNavigate();
+  const { userId, email, name, logout } = useContext(UserContext);
 
   // Logout handler
   const handleLogout = () => {
-    // Optional: clear any auth tokens or user data here
-    // localStorage.removeItem('token');
+    logout(); // clear user context
     navigate('/login');
   };
+
+  console.log("User ID from context:", userId);
 
   return (
     <Container>
       <Typography variant="h4" align="center" gutterBottom>Dashboard</Typography>
+
+      <Typography variant="subtitle1" align="center">
+        Welcome {name}
+      </Typography>
 
       <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 2, mb: 2 }}>
         <Button variant="contained" onClick={() => navigate('/userdata')}>User Data</Button>

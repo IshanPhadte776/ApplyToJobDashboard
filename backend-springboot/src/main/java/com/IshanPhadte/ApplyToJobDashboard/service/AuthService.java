@@ -15,17 +15,17 @@ public class AuthService {
         this.userRepository = userRepository;
     }
 
-    public User register(String email, String password, String userDataID) {
-        // Optional: check if email already exists
+    // Register with email, password, userID, and name
+    public User register(String email, String password, String userID, String name) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
-        User user = new User(email, password, userDataID);
+        User user = new User(email, password, userID, name);
         return userRepository.save(user);
     }
 
-    public boolean login(String email, String password) {
-        Optional<User> user = userRepository.findByEmailAndPassword(email, password);
-        return user.isPresent();
+    // Login returns the User if successful
+    public Optional<User> login(String email, String password) {
+        return userRepository.findByEmailAndPassword(email, password);
     }
 }

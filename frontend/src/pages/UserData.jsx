@@ -1,20 +1,36 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import {
   Container,
   Typography,
-  TextField,
   Button,
   Box,
   Grid,
   IconButton,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Card,
+  CardContent,
+  Divider,
+  Stack,
+  Avatar,
 } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import EditIcon from "@mui/icons-material/Edit";
+import PhoneIcon from "@mui/icons-material/Phone";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import LanguageIcon from "@mui/icons-material/Language";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../context/UserContext";
 
 function UserData() {
   const navigate = useNavigate();
-  const userId = "IP083"; // hardcoded for now
+  const { userId } = useContext(UserContext);
+
   const [userData, setUserData] = useState({
     phoneNumber: "",
     linkedinUrl: "",
@@ -22,16 +38,16 @@ function UserData() {
     personalWebsiteUrl: "",
   });
 
-  const [form, setForm] = useState({ ...userData });
+  const [openField, setOpenField] = useState(null);
+  const [tempValue, setTempValue] = useState("");
 
-  // Fetch userData from backend
   const fetchUserData = async () => {
+    if (!userId) return;
     try {
       const res = await fetch(`http://localhost:8080/api/v1/userdata/${userId}`);
       if (res.ok) {
         const data = await res.json();
         setUserData(data);
-        setForm(data);
       } else {
         console.error("UserData not found");
       }
@@ -42,147 +58,140 @@ function UserData() {
 
   useEffect(() => {
     fetchUserData();
-  }, []);
+  }, [userId]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+  const handleEditClick = (field) => {
+    setOpenField(field);
+    setTempValue(userData[field] || "");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSave = async () => {
+    if (!userId || !openField) return;
+
+    const updatedData = { ...userData, [openField]: tempValue };
+
     try {
       const res = await fetch(`http://localhost:8080/api/v1/userdata/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(updatedData),
       });
       if (res.ok) {
-        fetchUserData(); // refresh display
+        setUserData(updatedData);
       }
     } catch (err) {
       console.error("Error updating userData:", err);
     }
+    setOpenField(null);
   };
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
   };
 
+  const fields = [
+    { key: "phoneNumber", label: "Phone Number", icon: <PhoneIcon fontSize="large" /> },
+    { key: "linkedinUrl", label: "LinkedIn", icon: <LinkedInIcon fontSize="large" /> },
+    { key: "githubUrl", label: "GitHub", icon: <GitHubIcon fontSize="large" /> },
+    { key: "personalWebsiteUrl", label: "Website", icon: <LanguageIcon fontSize="large" /> },
+  ];
+
   return (
-    <Container>
+    <Container maxWidth="md" sx={{ mt: 5 }}>
       <Button
         variant="outlined"
         color="secondary"
         onClick={() => navigate("/dashboard")}
-        sx={{ mb: 2 }}
+        sx={{ mb: 4 }}
       >
         Back to Dashboard
       </Button>
 
-      <Typography variant="h4" align="center" gutterBottom>
-        User Data
-      </Typography>
-
-      {/* Display userData with copy buttons */}
-      <Box sx={{ mb: 3 }}>
-        <Grid container alignItems="center" spacing={1}>
-          <Grid item xs={10}>
-            <Typography variant="h6">Phone Number: {userData.phoneNumber}</Typography>
-          </Grid>
-          <Grid item xs={2}>
-            <Tooltip title="Copy Phone Number">
-              <IconButton onClick={() => copyToClipboard(userData.phoneNumber)}>
-                <ContentCopyIcon />
-              </IconButton>
-            </Tooltip>
-          </Grid>
-
-          <Grid item xs={10}>
-            <Typography variant="h6">LinkedIn: {userData.linkedinUrl}</Typography>
-          </Grid>
-          <Grid item xs={2}>
-            <Tooltip title="Copy LinkedIn URL">
-              <IconButton onClick={() => copyToClipboard(userData.linkedinUrl)}>
-                <ContentCopyIcon />
-              </IconButton>
-            </Tooltip>
-          </Grid>
-
-          <Grid item xs={10}>
-            <Typography variant="h6">GitHub: {userData.githubUrl}</Typography>
-          </Grid>
-          <Grid item xs={2}>
-            <Tooltip title="Copy GitHub URL">
-              <IconButton onClick={() => copyToClipboard(userData.githubUrl)}>
-                <ContentCopyIcon />
-              </IconButton>
-            </Tooltip>
-          </Grid>
-
-          <Grid item xs={10}>
-            <Typography variant="h6">Website: {userData.personalWebsiteUrl}</Typography>
-          </Grid>
-          <Grid item xs={2}>
-            <Tooltip title="Copy Website URL">
-              <IconButton onClick={() => copyToClipboard(userData.personalWebsiteUrl)}>
-                <ContentCopyIcon />
-              </IconButton>
-            </Tooltip>
-          </Grid>
-        </Grid>
+      <Box textAlign="center" mb={4}>
+        <Avatar
+          sx={{
+            bgcolor: "primary.main",
+            width: 100,
+            height: 100,
+            margin: "0 auto",
+            fontSize: 36,
+          }}
+        >
+          {userId ? userId.charAt(0).toUpperCase() : "U"}
+        </Avatar>
+        <Typography variant="h4" fontWeight={700} mt={2}>
+          User Data
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary">
+          Manage and update your profile details
+        </Typography>
       </Box>
 
-      {/* Edit userData form */}
-      <Box component="form" onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              name="phoneNumber"
-              label="Phone Number"
-              value={form.phoneNumber}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              name="linkedinUrl"
-              label="LinkedIn URL"
-              value={form.linkedinUrl}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              name="githubUrl"
-              label="GitHub URL"
-              value={form.githubUrl}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              name="personalWebsiteUrl"
-              label="Personal Website URL"
-              value={form.personalWebsiteUrl}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary" fullWidth>
-              Update User Data
-            </Button>
-          </Grid>
-        </Grid>
-      </Box>
+      <Card elevation={4} sx={{ borderRadius: 3 }}>
+        <CardContent>
+          {fields.map(({ key, label, icon }, idx) => (
+            <Box key={key}>
+              <Grid
+                container
+                alignItems="center"
+                spacing={3}
+                sx={{ py: 2 }}
+              >
+                <Grid item>{icon}</Grid>
+                <Grid item xs>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {label}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    {userData[key] || "Not set"}
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Stack direction="row" spacing={2}>
+                    <Tooltip title={`Copy ${label}`}>
+                      <IconButton
+                        size="medium"
+                        onClick={() => copyToClipboard(userData[key])}
+                      >
+                        <ContentCopyIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={`Edit ${label}`}>
+                      <IconButton
+                        size="medium"
+                        color="primary"
+                        onClick={() => handleEditClick(key)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                </Grid>
+              </Grid>
+              {idx < fields.length - 1 && <Divider />}
+            </Box>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Dialog open={Boolean(openField)} onClose={() => setOpenField(null)}>
+        <DialogTitle>Edit {openField}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            margin="dense"
+            value={tempValue}
+            onChange={(e) => setTempValue(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenField(null)}>Cancel</Button>
+          <Button variant="contained" onClick={handleSave}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

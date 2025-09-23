@@ -14,7 +14,7 @@ public class CompanyAccount {
     private String email;
     private String password;
     private String portalUrl;
-    private String userDataID;
+    private String userID;
 
     // Getters and setters
     public String getId() { return id; }
@@ -28,6 +28,6 @@ public class CompanyAccount {
     public void setPassword(String password) { this.password = password; }
     public String getPortalUrl() { return portalUrl; }
     public void setPortalUrl(String portalUrl) { this.portalUrl = portalUrl; }
-    public String getUserDataID() { return userDataID; }
-    public void setUserDataID(String userDataID) { this.userDataID = userDataID; }
+    public String getUserDataID() { return userID; }
+    public void setUserDataID(String userDataID) { this.userID = userDataID; }
 }

@@ -8,6 +8,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import com.IshanPhadte.ApplyToJobDashboard.model.CompanyAccount;
 
 public interface CompanyAccountRepository extends MongoRepository<CompanyAccount, String> {
-    List<CompanyAccount> findByUserDataID(String userDataID);
-    Optional<CompanyAccount> findByAccountIdAndUserDataID(String accountId, String userDataID);
+    List<CompanyAccount> findByUserID(String userID);
+    Optional<CompanyAccount> findByAccountIdAndUserID(String accountId, String userID);
 }
