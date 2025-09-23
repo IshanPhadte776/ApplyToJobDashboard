@@ -1,10 +1,14 @@
 package com.IshanPhadte.ApplyToJobDashboard.controller;
 
-import com.IshanPhadte.ApplyToJobDashboard.service.AuthService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.IshanPhadte.ApplyToJobDashboard.service.AuthService;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -17,24 +21,24 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
-        String username = body.get("username");
+        String email = body.get("email");
         String password = body.get("password");
         String userDataID = body.get("userDataID");
 
-        var user = authService.register(username, password, userDataID);
+        var user = authService.register(email, password, userDataID);
         return ResponseEntity.ok(Map.of(
                 "userId", user.getId(),
-                "username", user.getUsername()
+                "email", user.getEmail()
         ));
     }
 
     
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        String username = body.get("username");
+        String email = body.get("email");
         String password = body.get("password");
 
-        boolean success = authService.login(username, password);
+        boolean success = authService.login(email, password);
         return ResponseEntity.ok(Map.of("success", success));
     }
 

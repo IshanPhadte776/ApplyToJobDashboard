@@ -7,6 +7,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import com.IshanPhadte.ApplyToJobDashboard.model.User;
 
 public interface UserRepository extends MongoRepository<User, String> {
-    Optional<User> findByUsernameAndPassword(String username, String password);
-    Optional<User> findByUsername(String username);
+    Optional<User> findByEmailAndPassword(String email, String password);
+    Optional<User> findByEmail(String email);
 }

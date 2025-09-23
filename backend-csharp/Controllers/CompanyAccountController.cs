@@ -21,6 +21,9 @@ namespace backend_csharp.Controllers
 
         // ✅ GET /api/v1/accounts?userDataID=IP083
         [HttpGet]
+
+        // curl -Method GET "http://localhost:8080/api/v1/accounts?userDataID=IP083" `
+        //      -Headers @{ "Content-Type" = "application/json" }
         public IActionResult GetAllAccounts([FromQuery] string userDataID)
         {
             var filter = Builders<BsonDocument>.Filter.Eq("userDataID", userDataID);
@@ -42,6 +45,10 @@ namespace backend_csharp.Controllers
 
         // ✅ POST /api/v1/accounts
         [HttpPost]
+
+        //curl -Method POST "http://localhost:8080/api/v1/accounts" `
+        //     -Headers @{ "Content-Type" = "application/json" } `
+        //     -Body '{ "accountId": "ACC001", "companyName": "Acme Corp", "email": "contact@acme.com", "password": "pass123", "portalUrl": "https://portal.acme.com", "userDataID": "IP083" }'
         public IActionResult AddAccount([FromBody] CompanyAccountRequest request)
         {
             var accountDoc = new BsonDocument
@@ -60,6 +67,10 @@ namespace backend_csharp.Controllers
 
         // ✅ PUT /api/v1/accounts/{accountId}?userDataID=IP083
         [HttpPut("{accountId}")]
+
+        //curl -Method PUT "http://localhost:8080/api/v1/accounts/ACC001?userDataID=IP083" `
+        //     -Headers @{ "Content-Type" = "application/json" } `
+        //     -Body '{ "accountId": "ACC001", "companyName": "Acme Corp Updated", "email": "contact@acme.com", "password": "newpass456", "portalUrl": "https://portal.acme.com", "userDataID": "IP083" }'
         public IActionResult UpdateAccount(string accountId, [FromQuery] string userDataID, [FromBody] CompanyAccountRequest request)
         {
             var filter = Builders<BsonDocument>.Filter.Eq("accountId", accountId) &
@@ -79,6 +90,9 @@ namespace backend_csharp.Controllers
 
         // ✅ DELETE /api/v1/accounts/{accountId}?userDataID=IP083
         [HttpDelete("{accountId}")]
+
+        //    curl -Method DELETE "http://localhost:8080/api/v1/accounts/ACC001?userDataID=IP083" `
+        //         -Headers @{ "Content-Type" = "application/json" }
         public IActionResult DeleteAccount(string accountId, [FromQuery] string userDataID)
         {
             var filter = Builders<BsonDocument>.Filter.Eq("accountId", accountId) &

@@ -6,7 +6,7 @@
 Stores login and personal info.
 
 - **_id** (ObjectId / INT PK)
-- **username** (string, unique)
+- **email** (string, unique)
 - **password** (string, hashed with BCrypt)
 - **userDataId** (ObjectId / FK → UserData)
 
