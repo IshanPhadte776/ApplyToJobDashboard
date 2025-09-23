@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.IshanPhadte.ApplyToJobDashboard.model.User;
@@ -69,4 +70,22 @@ public class AuthControllerTest {
                 .content(loginJson))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void testFailedLogin() throws Exception {
+        // --- Attempt Login with wrong credentials ---
+        Map<String, String> loginBody = Map.of(
+                "email", "nonexistent@example.com",
+                "password", "wrongpassword"
+        );
+        String loginJson = objectMapper.writeValueAsString(loginBody);
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginJson))
+                .andExpect(status().isOk())  // login endpoint returns 200 even if failed
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+
 }
