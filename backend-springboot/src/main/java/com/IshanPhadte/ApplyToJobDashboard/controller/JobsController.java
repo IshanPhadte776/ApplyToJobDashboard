@@ -80,10 +80,11 @@ public class JobsController {
     }
 
     // PUT update job by MongoDB _id
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateJob(@PathVariable String id, @RequestBody JobApplication request) {
-        Optional<JobApplication> existing = repository.findById(id);
-        if (existing.isEmpty() || !existing.get().getUserDataID().equals(request.getUserDataID())) {
+    // PUT update job by jobId
+    @PutMapping("/update/{jobId}")
+    public ResponseEntity<?> updateJobByJobId(@PathVariable String jobId, @RequestBody JobApplication request) {
+        Optional<JobApplication> existing = repository.findByJobIdAndUserDataID(jobId, request.getUserDataID());
+        if (existing.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
@@ -98,6 +99,7 @@ public class JobsController {
         repository.save(jobToUpdate);
         return ResponseEntity.ok("{\"updated\": true}");
     }
+
 
     // DELETE job by jobId and userDataID
     @DeleteMapping("/{jobId}")

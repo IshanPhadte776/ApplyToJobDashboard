@@ -43,6 +43,7 @@ Stores general profile info and user documents.
 
 - **_id** (ObjectId / INT PK)
 - **userId** (ObjectId / FK → Users)
+- **phoneNumber** (string)
 - **linkedinUrl** (string)
 - **githubUrl** (string)
 - **personalWebsiteUrl** (string)
