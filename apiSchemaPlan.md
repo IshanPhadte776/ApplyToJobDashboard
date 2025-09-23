@@ -78,7 +78,8 @@ Copy code
   "companyName": "CIBC",
   "email": "user@cibc.com",
   "password": "secret123",
-  "portalUrl": "https://careers.cibc.com"
+  "portalUrl": "https://careers.cibc.com",
+  "userDataID": "IP083"
 }
 PUT /{id} → Update account
 
