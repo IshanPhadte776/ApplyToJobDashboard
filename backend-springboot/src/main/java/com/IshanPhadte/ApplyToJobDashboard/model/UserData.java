@@ -7,20 +7,20 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class UserData {
 
     @Id
-    private String _id;
+    private String ID;        // MongoDB auto-generated ID
 
-    private String userId; // FK → Users
+    private String userID;    // FK → Users
     private String phoneNumber;
     private String linkedinUrl;
     private String githubUrl;
     private String personalWebsiteUrl;
 
     // Getters and Setters
-    public String get_id() { return _id; }
-    public void set_id(String _id) { this._id = _id; }
+    public String getID() { return ID; }
+    public void setID(String ID) { this.ID = ID; }
 
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
+    public String getUserID() { return userID; }
+    public void setUserID(String userID) { this.userID = userID; }
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }

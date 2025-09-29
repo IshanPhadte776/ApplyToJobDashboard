@@ -6,26 +6,26 @@ export const UserContext = createContext();
 // Create provider
 export function UserProvider({ children }) {
   // Initialize from localStorage if available
-  const [userId, setUserId] = useState(() => localStorage.getItem("userId") || null);
+  const [userID, setUserID] = useState(() => localStorage.getItem("userID") || null);
   const [email, setEmail] = useState(() => localStorage.getItem("email") || null);
   const [name, setName] = useState(() => localStorage.getItem("name") || null);
 
   // Login function
-  const login = (id, userEmail, userName) => {
-    setUserId(id);
+  const login = (userID, userEmail, userName) => {
+    setUserID(userID);
     setEmail(userEmail);
     setName(userName);
-    localStorage.setItem("userId", id);
+    localStorage.setItem("userID", userID);
     localStorage.setItem("email", userEmail);
     localStorage.setItem("name", userName);
   };
 
   // Logout function
   const logout = () => {
-    setUserId(null);
+    setUserID(null);
     setEmail(null);
     setName(null);
-    localStorage.removeItem("userId");
+    localStorage.removeItem("userID");
     localStorage.removeItem("email");
     localStorage.removeItem("name");
   };
@@ -33,7 +33,7 @@ export function UserProvider({ children }) {
   // Optional: keep state in sync if localStorage changes outside React
   useEffect(() => {
     const handleStorageChange = () => {
-      setUserId(localStorage.getItem("userId"));
+      setUserID(localStorage.getItem("userID"));
       setEmail(localStorage.getItem("email"));
       setName(localStorage.getItem("name"));
     };
@@ -42,7 +42,7 @@ export function UserProvider({ children }) {
   }, []);
 
   return (
-    <UserContext.Provider value={{ userId, email, name, login, logout }}>
+    <UserContext.Provider value={{ userID, email, name, login, logout }}>
       {children}
     </UserContext.Provider>
   );

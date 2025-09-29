@@ -18,7 +18,7 @@ import com.IshanPhadte.ApplyToJobDashboard.model.CompanyAccount;
 import com.IshanPhadte.ApplyToJobDashboard.repository.CompanyAccountRepository;
 
 @RestController
-@RequestMapping("/api/v1/accounts")
+@RequestMapping("/api/v1/companyaccounts")
 public class CompanyAccountsController {
 
     private final CompanyAccountRepository repository;
@@ -27,55 +27,45 @@ public class CompanyAccountsController {
         this.repository = repository;
     }
 
-    // GET /api/v1/accounts?userID=IP083
+    // GET /api/v1/companyaccounts?userID=IP083 → List all company accounts for a user
     @GetMapping
-    public List<CompanyAccount> getAllAccounts(@RequestParam String userID) {
+    public List<CompanyAccount> getCompanyAccountsForUser(@RequestParam String userID) {
         return repository.findByUserID(userID);
     }
 
-    // GET /api/v1/accounts/{accountId}?userID=IP083
-    @GetMapping("/{accountId}")
-    public ResponseEntity<CompanyAccount> getAccountById(
-            @PathVariable String accountId,
-            @RequestParam String userID
-    ) {
-        Optional<CompanyAccount> account = repository.findByAccountIdAndUserID(accountId, userID);
-        return account.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    // POST /api/v1/accounts
+    // POST /api/v1/companyaccounts → Add a new company account
     @PostMapping
-    public CompanyAccount addAccount(@RequestBody CompanyAccount request) {
+    public CompanyAccount addCompanyAccount(@RequestBody CompanyAccount request) {
         return repository.save(request);
     }
 
-    // PUT /api/v1/accounts/{accountId}?userID=IP083
-    @PutMapping("/{accountId}")
-    public ResponseEntity<?> updateAccount(
-            @PathVariable String accountId,
+    // PUT /api/v1/companyaccounts/{accountID}?userID=IP083 → Update a specific company account
+    @PutMapping("/{accountID}")
+    public ResponseEntity<?> updateCompanyAccount(
+            @PathVariable String accountID,
             @RequestParam String userID,
             @RequestBody CompanyAccount request
     ) {
-        Optional<CompanyAccount> existing = repository.findByAccountIdAndUserID(accountId, userID);
+        Optional<CompanyAccount> existing = repository.findByAccountIDAndUserID(accountID, userID);
         if (existing.isEmpty()) return ResponseEntity.notFound().build();
 
         CompanyAccount accountToUpdate = existing.get();
         accountToUpdate.setCompanyName(request.getCompanyName());
         accountToUpdate.setEmail(request.getEmail());
         accountToUpdate.setPassword(request.getPassword());
-        accountToUpdate.setPortalUrl(request.getPortalUrl());
+        accountToUpdate.setPortalURL(request.getPortalURL());
 
         repository.save(accountToUpdate);
         return ResponseEntity.ok().body("{\"updated\": true}");
     }
 
-    // DELETE /api/v1/accounts/{accountId}?userID=IP083
-    @DeleteMapping("/{accountId}")
-    public ResponseEntity<?> deleteAccount(
-            @PathVariable String accountId,
+    // DELETE /api/v1/companyaccounts/{accountID}?userID=IP083 → Delete a specific company account
+    @DeleteMapping("/{accountID}")
+    public ResponseEntity<?> deleteCompanyAccount(
+            @PathVariable String accountID,
             @RequestParam String userID
     ) {
-        Optional<CompanyAccount> existing = repository.findByAccountIdAndUserID(accountId, userID);
+        Optional<CompanyAccount> existing = repository.findByAccountIDAndUserID(accountID, userID);
         if (existing.isEmpty()) return ResponseEntity.notFound().build();
 
         repository.delete(existing.get());

@@ -7,5 +7,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import com.IshanPhadte.ApplyToJobDashboard.model.UserData;
 
 public interface UserDataRepository extends MongoRepository<UserData, String> {
-    Optional<UserData> findByUserId(String userId);
+    Optional<UserData> findByUserID(String userID);
 }

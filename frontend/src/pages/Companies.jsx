@@ -10,9 +10,12 @@ import {
   Box,
   IconButton,
   Tooltip,
+  Stack,
   Grid,
 } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 
@@ -20,34 +23,38 @@ const API_BASE = "http://localhost:8080/api/v1";
 
 function CompanyAccounts() {
   const navigate = useNavigate();
-  const { userId, name } = useContext(UserContext); // get userId and name from context
+  const { userID, name } = useContext(UserContext); // get userID and name from context
 
   const [accounts, setAccounts] = useState([]);
   const [form, setForm] = useState({
     companyName: "",
     email: "",
     password: "",
-    portalUrl: "",
+    portalURL: "",
   });
+
+  const [revealedPasswords, setRevealedPasswords] = useState({}); // Track revealed passwords
+
 
   // ✅ Fetch all accounts for user
   const fetchAccounts = async () => {
-    if (!userId) return;
+    if (!userID) return;
     try {
-      const res = await fetch(`${API_BASE}/accounts?userID=${userId}`);
+      const res = await fetch(`${API_BASE}/companyaccounts?userID=${userID}`);
       const data = await res.json();
+      console.log("Fetched accounts:", data);
       setAccounts(data);
     } catch (err) {
       console.error("Error fetching accounts:", err);
     }
   };
 
-  console.log("User ID from context:", userId);
+  console.log("User ID from context:", userID);
 
 
   useEffect(() => {
     fetchAccounts();
-  }, [userId]);
+  }, [userID]);
 
   // ✅ Handle input changes
   const handleChange = (e) => {
@@ -55,7 +62,7 @@ function CompanyAccounts() {
   };
 
   // ✅ Generate account ID like AC123456
-  const generateAccountId = () => {
+  const generateAccountID = () => {
     const randomNum = Math.floor(100000 + Math.random() * 900000); // 6 digits
     return `AC${randomNum}`;
   };
@@ -63,16 +70,16 @@ function CompanyAccounts() {
   // ✅ Add a new account
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!userId) return;
+    if (!userID) return;
 
     const newAccount = {
       ...form,
-      accountId: generateAccountId(),
-      userID: userId, // use userId from context
+      accountID: generateAccountID(),
+      userID: userID, // use userId from context
     };
 
     try {
-      const res = await fetch(`${API_BASE}/accounts`, {
+      const res = await fetch(`${API_BASE}/companyaccounts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAccount),
@@ -82,7 +89,7 @@ function CompanyAccounts() {
           companyName: "",
           email: "",
           password: "",
-          portalUrl: "",
+          portalURL: "",
         });
         fetchAccounts(); // refresh list
       }
@@ -94,6 +101,13 @@ function CompanyAccounts() {
   // ✅ Copy helper
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
+  };
+
+   const togglePasswordVisibility = (accountID) => {
+    setRevealedPasswords((prev) => ({
+      ...prev,
+      [accountID]: !prev[accountID],
+    }));
   };
 
   return (
@@ -143,9 +157,9 @@ function CompanyAccounts() {
           required
         />
         <TextField
-          name="portalUrl"
+          name="portalURL"
           label="Portal URL"
-          value={form.portalUrl}
+          value={form.portalURL}
           onChange={handleChange}
           fullWidth
           margin="normal"
@@ -182,26 +196,45 @@ function CompanyAccounts() {
 
             {/* Password */}
             <Grid container alignItems="center">
-              <Grid item xs>
-                <ListItemText primary={`Password: ${acc.password}`} />
-              </Grid>
-              <Grid item>
-                <Tooltip title="Copy Password">
-                  <IconButton onClick={() => copyToClipboard(acc.password)}>
-                    <ContentCopyIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </Grid>
-            </Grid>
+  <Grid item xs>
+    <ListItemText
+      primary={`Password: ${
+        revealedPasswords[acc.accountID] ? acc.password : "***"
+      }`}
+    />
+  </Grid>
+  <Grid item>
+    <Stack direction="row" spacing={1}>
+      <Tooltip title="Copy Password">
+        <IconButton onClick={() => copyToClipboard(acc.password)}>
+          <ContentCopyIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip
+        title={
+          revealedPasswords[acc.accountID] ? "Hide Password" : "Reveal Password"
+        }
+      >
+        <IconButton onClick={() => togglePasswordVisibility(acc.accountID)}>
+          {revealedPasswords[acc.accountID] ? (
+            <VisibilityOffIcon fontSize="small" />
+          ) : (
+            <VisibilityIcon fontSize="small" />
+          )}
+        </IconButton>
+      </Tooltip>
+    </Stack>
+  </Grid>
+</Grid>
 
             {/* Portal URL */}
             <Grid container alignItems="center">
               <Grid item xs>
-                <ListItemText primary={`Portal: ${acc.portalUrl}`} />
+                <ListItemText primary={`Portal: ${acc.portalURL}`} />
               </Grid>
               <Grid item>
                 <Tooltip title="Copy Portal URL">
-                  <IconButton onClick={() => copyToClipboard(acc.portalUrl)}>
+                  <IconButton onClick={() => copyToClipboard(acc.portalURL)}>
                     <ContentCopyIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>

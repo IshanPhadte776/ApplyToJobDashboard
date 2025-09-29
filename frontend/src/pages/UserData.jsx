@@ -29,7 +29,7 @@ import { UserContext } from "../context/UserContext";
 
 function UserData() {
   const navigate = useNavigate();
-  const { userId } = useContext(UserContext);
+  const { userID } = useContext(UserContext);
 
   const [userData, setUserData] = useState({
     phoneNumber: "",
@@ -42,9 +42,9 @@ function UserData() {
   const [tempValue, setTempValue] = useState("");
 
   const fetchUserData = async () => {
-    if (!userId) return;
+    if (!userID) return;
     try {
-      const res = await fetch(`http://localhost:8080/api/v1/userdata/${userId}`);
+      const res = await fetch(`http://localhost:8080/api/v1/userdata/${userID}`);
       if (res.ok) {
         const data = await res.json();
         setUserData(data);
@@ -58,7 +58,7 @@ function UserData() {
 
   useEffect(() => {
     fetchUserData();
-  }, [userId]);
+  }, [userID]);
 
   const handleEditClick = (field) => {
     setOpenField(field);
@@ -66,24 +66,35 @@ function UserData() {
   };
 
   const handleSave = async () => {
-    if (!userId || !openField) return;
+    if (!userID || !openField) return;
 
     const updatedData = { ...userData, [openField]: tempValue };
 
     try {
-      const res = await fetch(`http://localhost:8080/api/v1/userdata/${userId}`, {
+      const res = await fetch(`http://localhost:8080/api/v1/userdata/${userID}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedData),
       });
+
       if (res.ok) {
-        setUserData(updatedData);
+        // Backend returns JSON like {"updated": true}
+        const data = await res.json();
+        if (data.updated) {
+          setUserData(updatedData);
+        } else {
+          console.error("Update failed", data);
+        }
+      } else {
+        console.error("Update request failed with status:", res.status);
       }
     } catch (err) {
       console.error("Error updating userData:", err);
     }
+
     setOpenField(null);
   };
+
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
@@ -117,7 +128,7 @@ function UserData() {
             fontSize: 36,
           }}
         >
-          {userId ? userId.charAt(0).toUpperCase() : "U"}
+          {userID ? userID.charAt(0).toUpperCase() : "U"}
         </Avatar>
         <Typography variant="h4" fontWeight={700} mt={2}>
           User Data

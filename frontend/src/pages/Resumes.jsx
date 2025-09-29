@@ -17,7 +17,7 @@ const API_BASE = "http://localhost:8080/api/v1";
 
 function Documents() {
   const navigate = useNavigate();
-  const { userId } = useContext(UserContext);
+  const { userID } = useContext(UserContext);
 
   const [resumes, setResumes] = useState([]);
   const [coverLetters, setCoverLetters] = useState([]);
@@ -27,13 +27,13 @@ function Documents() {
 
   // Fetch documents
   const fetchDocuments = async () => {
-    if (!userId) return;
+    if (!userID) return;
     try {
-      const resResumes = await fetch(`${API_BASE}/resumes/${userId}`);
+      const resResumes = await fetch(`${API_BASE}/resumes/${userID}`);
       const resumesData = resResumes.ok ? await resResumes.json() : [];
       setResumes(Array.isArray(resumesData) ? resumesData : []);
 
-      const resCovers = await fetch(`${API_BASE}/coverletters/${userId}`);
+      const resCovers = await fetch(`${API_BASE}/coverletters/${userID}`);
       const coversData = resCovers.ok ? await resCovers.json() : [];
       setCoverLetters(Array.isArray(coversData) ? coversData : []);
     } catch (err) {
@@ -45,9 +45,9 @@ function Documents() {
 
   useEffect(() => {
     fetchDocuments();
-  }, [userId]);
+  }, [userID]);
 
-  console.log("User ID from context:", userId);
+  console.log("User ID from context:", userID);
 
   const handleChange = (e, formSetter) => {
     const { name, value, files } = e.target;
@@ -55,7 +55,7 @@ function Documents() {
   };
 
   const handleUpload = async (form, endpoint, resetForm) => {
-    if (!form.title || !form.file || !userId) {
+    if (!form.title || !form.file || !userID) {
       alert("Please provide both title and file");
       return;
     }
@@ -63,7 +63,7 @@ function Documents() {
     const formData = new FormData();
     formData.append("title", form.title);
     formData.append("file", form.file);
-    formData.append("userId", userId);
+    formData.append("userID", userID);
 
     try {
       const res = await fetch(`${API_BASE}/${endpoint}/upload`, {
@@ -79,14 +79,14 @@ function Documents() {
   };
 
   const handleDelete = async (id, endpoint) => {
-    if (!userId) return;
-    await fetch(`${API_BASE}/${endpoint}/${id}?userId=${userId}`, { method: "DELETE" });
+    if (!userID) return;
+    await fetch(`${API_BASE}/${endpoint}/${id}?userID=${userID}`, { method: "DELETE" });
     fetchDocuments();
   };
 
-  const handleDownload = async (fileId, filename, endpoint) => {
+  const handleDownload = async (fileID, filename, endpoint) => {
     try {
-      const res = await fetch(`${API_BASE}/${endpoint}/download/${fileId}`);
+      const res = await fetch(`${API_BASE}/${endpoint}/download/${fileID}`);
       if (!res.ok) throw new Error("Download failed");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -116,7 +116,7 @@ function Documents() {
           <Box sx={{ mt: 1 }}>
             <Button
               variant="outlined"
-              onClick={() => handleDownload(doc.fileId, doc.title, type)}
+              onClick={() => handleDownload(doc.fileID, doc.title, type)}
               sx={{ mr: 1 }}
             >
               Download

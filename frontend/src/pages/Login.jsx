@@ -18,7 +18,7 @@ function Login() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8080/api/v1/auth/login', {
+      const response = await fetch('http://localhost:8080/api/v1/auth/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -26,9 +26,13 @@ function Login() {
 
       const data = await response.json();
 
+      console.log('Login response:', data);
+
       if (data.success) {
-        login(data.userId, data.email, data.name || '');
+        login(data.userID, data.email, data.name || '');
+        console.log("login successful, navigating to dashboard");
         navigate('/dashboard');
+        console.log("navigation complete");
       } else {
         setError('Invalid email or password');
       }

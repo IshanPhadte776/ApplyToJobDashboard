@@ -13,7 +13,7 @@ import com.IshanPhadte.ApplyToJobDashboard.model.User;
 import com.IshanPhadte.ApplyToJobDashboard.service.AuthService;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1")
 public class AuthController {
     private final AuthService authService;
 
@@ -21,7 +21,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/register")
+    @PostMapping("/users")
     public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
         String email = body.get("email");
         String password = body.get("password");
@@ -31,13 +31,13 @@ public class AuthController {
         User user = authService.register(email, password, userID, name);
 
         return ResponseEntity.ok(Map.of(
-            "userId", user.getUserID(),
+            "userID", user.getUserID(),
             "email", user.getEmail(),
             "name", user.getName()
         ));
     }
 
-    @PostMapping("/login")
+    @PostMapping("/auth/token")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
         String email = body.get("email");
         String password = body.get("password");
@@ -48,7 +48,7 @@ public class AuthController {
             User user = optionalUser.get(); // extract the actual User object
             return ResponseEntity.ok(Map.of(
                 "success", true,
-                "userId", user.getUserID(),
+                "userID", user.getUserID(),
                 "name", user.getName(),
                 "email", user.getEmail()
             ));

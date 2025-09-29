@@ -9,5 +9,5 @@ import com.IshanPhadte.ApplyToJobDashboard.model.CompanyAccount;
 
 public interface CompanyAccountRepository extends MongoRepository<CompanyAccount, String> {
     List<CompanyAccount> findByUserID(String userID);
-    Optional<CompanyAccount> findByAccountIdAndUserID(String accountId, String userID);
+    Optional<CompanyAccount> findByAccountIDAndUserID(String accountID, String userID);
 }

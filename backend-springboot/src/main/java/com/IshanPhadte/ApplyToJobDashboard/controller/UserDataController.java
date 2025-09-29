@@ -25,9 +25,9 @@ public class UserDataController {
     }
 
     // GET userData by userId
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getUserData(@PathVariable String userId) {
-        Optional<UserData> existing = repository.findByUserId(userId);
+    @GetMapping("/{userID}")
+    public ResponseEntity<?> getUserData(@PathVariable String userID) {
+        Optional<UserData> existing = repository.findByUserID(userID);
         return existing
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -37,7 +37,7 @@ public class UserDataController {
     @PostMapping
     public ResponseEntity<?> createUserData(@RequestBody UserData request) {
         // Check if already exists
-        Optional<UserData> existing = repository.findByUserId(request.getUserId());
+        Optional<UserData> existing = repository.findByUserID(request.getUserID());
         if (existing.isPresent()) {
             return ResponseEntity.badRequest().body("{\"error\": \"UserData already exists\"}");
         }
@@ -49,10 +49,10 @@ public class UserDataController {
     // PUT update userData by userId
     @PutMapping("/{userId}")
     public ResponseEntity<?> updateUserData(
-            @PathVariable String userId,
+            @PathVariable String userID,
             @RequestBody UserData request
     ) {
-        Optional<UserData> existing = repository.findByUserId(userId);
+        Optional<UserData> existing = repository.findByUserID(userID);
         if (existing.isEmpty()) {
             return ResponseEntity.notFound().build();
         }

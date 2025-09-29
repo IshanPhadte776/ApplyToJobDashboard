@@ -1,23 +1,28 @@
 import { useEffect, useState, useContext } from "react";
 import {
-  Container,
-  Typography,
-  TextField,
-  Button,
   Box,
-  IconButton,
-  Tooltip,
-  Grid,
+  Button,
   Card,
-  CardContent,
   CardActions,
-  Paper,
+  CardContent,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
+  Grid,
+  IconButton,
+  MenuItem,
+  Paper,
+  Select,
   Stack,
+  TextField,
+  Tooltip,
+  Typography,
 } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import WorkIcon from "@mui/icons-material/Work";
-import BusinessIcon from "@mui/icons-material/Business";
 import TodayIcon from "@mui/icons-material/Today";
 import LinkIcon from "@mui/icons-material/Link";
 import { useNavigate } from "react-router-dom";
@@ -26,20 +31,26 @@ import { UserContext } from "../context/UserContext";
 
 function Applications() {
   const navigate = useNavigate();
-  const { userId, name } = useContext(UserContext);
+  const { userID, name } = useContext(UserContext);
   const [applications, setApplications] = useState([]);
   const [filteredApplications, setFilteredApplications] = useState([]);
   const [form, setForm] = useState({
-    jobId: "",
     jobTitle: "",
     company: "",
     status: "Applied",
     dateApplied: getESTDate(),
     accountNeeded: false,
-    jobUrl: "",
-    userDataID: userId || "",
+    applicationURL: "",
+    userID: userID || "",
   });
   const [filters, setFilters] = useState({ jobTitle: "", status: "", dateApplied: "", company: "" });
+
+  // Modal state
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedApp, setSelectedApp] = useState(null);
+
+  const STATUS_OPTIONS = ["Applied", "OA" ,"Interviewing", "Offer", "Rejected"];
+
 
   function getESTDate() {
     const estDate = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
@@ -49,25 +60,31 @@ function Applications() {
 
   const fetchApplications = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/api/v1/jobs?userDataID=${userId}`);
+      const res = await fetch(`http://localhost:8080/api/v1/users/${userID}/applications?page=0&size=20`);
       const data = await res.json();
-      setApplications(data);
-      setFilteredApplications(data);
+      console.log("Applications response:", data);
+
+      setApplications(Array.isArray(data) ? data : data.applications || []);
+      setFilteredApplications(Array.isArray(data) ? data : data.applications || []);
     } catch (err) {
       console.error("Error fetching applications:", err);
+      setApplications([]);
+      setFilteredApplications([]);
     }
   };
 
+
+
   useEffect(() => {
-    if (userId) fetchApplications();
-  }, [userId]);
+    if (userID) fetchApplications();
+  }, [userID]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm({
       ...form,
       [name]: type === "checkbox" ? checked : value,
-      userDataID: userId,
+      userID: userID,
     });
   };
 
@@ -76,31 +93,38 @@ function Applications() {
     setFilters({ ...filters, [name]: value });
   };
 
-  const generateJobId = () => {
+  const generateApplicationID = () => {
     const randomNum = Math.floor(1000 + Math.random() * 9000);
-    return `${userId}-${randomNum}`;
+    return `${userID}-${randomNum}`;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newApplication = { ...form, jobId: generateJobId(), userDataID: userId };
+    const newApplication = {
+      applicationID: generateApplicationID(),
+      jobTitle: form.jobTitle,
+      company: form.company,
+      status: form.status,
+      dateApplied: form.dateApplied,
+      accountNeeded: form.accountNeeded,
+      applicationURL: form.applicationURL,
+      userID: userID,
+    };
 
     try {
-      const res = await fetch("http://localhost:8080/api/v1/jobs", {
+      const res = await fetch("http://localhost:8080/api/v1/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newApplication),
       });
       if (res.ok) {
         setForm({
-          jobId: "",
           jobTitle: "",
           company: "",
           status: "Applied",
           dateApplied: getESTDate(),
           accountNeeded: false,
-          jobUrl: "",
-          userDataID: userId,
+          applicationURL: "",
         });
         fetchApplications();
       }
@@ -119,11 +143,74 @@ function Applications() {
       const matchesStatus = app.status.toLowerCase().includes(filters.status.toLowerCase());
       const matchesDate = !filters.dateApplied || app.dateApplied === filters.dateApplied;
       const matchesCompany = app.company.toLowerCase().includes(filters.company.toLowerCase());
-
       return matchesTitle && matchesStatus && matchesDate && matchesCompany;
     });
     setFilteredApplications(filtered);
   };
+
+  // Modal handlers
+  const handleOpenModal = (app) => {
+    setSelectedApp({ ...app });
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedApp(null);
+    setOpenModal(false);
+  };
+
+  const handleModalChange = (e) => {
+    const { name, value } = e.target;
+    setSelectedApp({ ...selectedApp, [name]: value });
+  };
+
+  const handleUpdateApplication = async () => {
+    if (!selectedApp) return;
+
+    const url = `http://localhost:8080/api/v1/applications/${selectedApp.applicationID}`;
+    const payload = {
+      status: selectedApp.status,
+      applicationURL: selectedApp.applicationURL,
+    };
+
+    try {
+      const res = await fetch(url, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      console.log("Update response:", data);
+
+      if (res.ok) {
+        fetchApplications();
+        handleCloseModal();
+      } else {
+        console.error("Update failed:", data);
+      }
+    } catch (err) {
+      console.error("Error updating application:", err);
+    }
+  };
+
+
+
+  const handleDeleteApplication = async (applicationID) => {
+    try {
+      const res = await fetch(`http://localhost:8080/api/v1/applications/${applicationID}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      console.log("Delete response:", data);
+
+      if (res.ok) fetchApplications();
+    } catch (err) {
+      console.error("Error deleting application:", err);
+    }
+  };
+
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
@@ -159,7 +246,7 @@ function Applications() {
               onChange={handleChange}
               InputLabelProps={{ shrink: true }}
             />
-            <TextField name="jobUrl" label="Job URL" value={form.jobUrl} onChange={handleChange} />
+            <TextField name="applicationURL" label="Job URL" value={form.applicationURL} onChange={handleChange} />
             <Button type="submit" variant="contained" color="primary">
               Add Application
             </Button>
@@ -174,7 +261,13 @@ function Applications() {
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label="Filter by Job Title" name="jobTitle" value={filters.jobTitle} onChange={handleFilterChange} />
+            <TextField
+              fullWidth
+              label="Filter by Job Title"
+              name="jobTitle"
+              value={filters.jobTitle}
+              onChange={handleFilterChange}
+            />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField fullWidth label="Filter by Status" name="status" value={filters.status} onChange={handleFilterChange} />
@@ -224,9 +317,9 @@ function Applications() {
                     </Box>
                     <Box display="flex" alignItems="center" gap={1}>
                       <LinkIcon color="action" />
-                      <Typography sx={{ wordBreak: "break-word" }}>{app.jobUrl}</Typography>
+                      <Typography sx={{ wordBreak: "break-word" }}>{app.applicationURL}</Typography>
                       <Tooltip title="Copy Job URL">
-                        <IconButton size="small" onClick={() => copyToClipboard(app.jobUrl)}>
+                        <IconButton size="small" onClick={() => copyToClipboard(app.applicationURL)}>
                           <ContentCopyIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -234,8 +327,11 @@ function Applications() {
                   </Stack>
                 </CardContent>
                 <CardActions sx={{ justifyContent: "flex-end" }}>
-                  <Button size="small" color="primary">
+                  <Button size="small" color="primary" onClick={() => handleOpenModal(app)}>
                     View Details
+                  </Button>
+                  <Button size="small" color="error" onClick={() => handleDeleteApplication(app.applicationID)}>
+                    Delete
                   </Button>
                 </CardActions>
               </Card>
@@ -243,6 +339,46 @@ function Applications() {
           ))}
         </Grid>
       </Box>
+
+      {/* Edit Modal */}
+      <Dialog open={openModal} onClose={handleCloseModal}>
+        <DialogTitle>Edit Application</DialogTitle>
+        <DialogContent>
+          {selectedApp && (
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              {/* 🔹 Status dropdown */}
+              <Select
+                label="Status"
+                name="status"
+                value={selectedApp.status}
+                onChange={handleModalChange}
+                fullWidth
+              >
+                {["Applied", "OA", "Interviewing", "Offer", "Rejected"].map((status) => (
+                  <MenuItem key={status} value={status}>
+                    {status}
+                  </MenuItem>
+                ))}
+              </Select>
+
+              {/* Application URL */}
+              <TextField
+                label="Application URL"
+                name="applicationURL"
+                value={selectedApp.applicationURL}
+                onChange={handleModalChange}
+                fullWidth
+              />
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal}>Cancel</Button>
+          <Button variant="contained" onClick={handleUpdateApplication}>
+            Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

@@ -38,16 +38,16 @@ public class ResumeController {
 
     // ---------- Upload ----------
     @PostMapping("/upload")
-    public Resume uploadResume(@RequestParam String userDataId,
+    public Resume uploadResume(@RequestParam String userID,
                                @RequestParam String title,
                                @RequestParam("file") MultipartFile file) throws IOException {
-        return service.uploadResume(userDataId, title, file);
+        return service.uploadResume(userID, title, file);
     }
 
     // ---------- Get metadata ----------
-    @GetMapping("/{userDataId}")
-    public List<Resume> getResumes(@PathVariable String userDataId) {
-        return service.getResumes(userDataId);
+    @GetMapping("/{userID}")
+    public List<Resume> getResumes(@PathVariable String userID) {
+        return service.getResumes(userID);
     }
 
     // ---------- Download file ----------
@@ -82,13 +82,13 @@ public class ResumeController {
     @PutMapping("/{id}")
     public Resume updateResume(@PathVariable String id,
                                @RequestParam String title,
-                               @RequestParam String userDataId) {
-        return service.updateResumeTitle(id, title, userDataId);
+                               @RequestParam String userID) {
+        return service.updateResumeTitle(id, title, userID);
     }
 
     // ---------- Delete ----------
     @DeleteMapping("/{id}")
-    public boolean deleteResume(@PathVariable String id, @RequestParam String userDataId) {
-        return service.deleteResume(id, userDataId);
+    public boolean deleteResume(@PathVariable String id, @RequestParam String userID) {
+        return service.deleteResume(id, userID);
     }
 }

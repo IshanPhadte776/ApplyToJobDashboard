@@ -12,8 +12,8 @@ import Resumes from './pages/Resumes';
 
 // PrivateRoute component
 function PrivateRoute({ children }) {
-  const { userId } = useContext(UserContext);
-  return userId ? children : <Navigate to="/login" replace />;
+  const { userID } = useContext(UserContext);
+  return userID ? children : <Navigate to="/login" replace />;
 }
 
 function App() {

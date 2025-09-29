@@ -5,7 +5,7 @@ import { UserContext } from '../context/UserContext';
 
 function Dashboard() {
   const navigate = useNavigate();
-  const { userId, email, name, logout } = useContext(UserContext);
+  const { userID, email, name, logout } = useContext(UserContext);
 
   // Logout handler
   const handleLogout = () => {
@@ -13,7 +13,10 @@ function Dashboard() {
     navigate('/login');
   };
 
-  console.log("User ID from context:", userId);
+  console.log("Dashboard render:", { userID, email, name });
+
+
+  console.log("User ID from context:", userID);
 
   return (
     <Container>
